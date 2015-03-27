@@ -19,14 +19,22 @@ import com.anor.behaviortree.SuccessNode;
 public class BehaviorTreesTest {
 
 	@Test
+	public void testNegateCondition() {
+		
+	}
+	
+	@Test
 	public void testInOrderSequenceFailure() {
 		Composite<Object> c = new Composite.InOrderSequence<Object>();
 		
-		c.addChild(new SuccessNode<Object>());
+		SuccessNode<Object> mockNode = mock(SuccessNode.class);
+		c.addChild(mockNode);
 		c.addChild(new FailNode<Object>());
+		c.addChild(mockNode);
 		
 		NodeStatus process = c.process(new Object());
 		assertTrue(process == NodeStatus.FAILURE);
+		verify(mockNode, times(1)).process(any());
 	}
 	
 	@Test
@@ -41,8 +49,22 @@ public class BehaviorTreesTest {
 		assertTrue(process == NodeStatus.SUCCESS);
 	}
 	
+	@Test
+	public void testInOrderSequenceRunning() {
+		Composite<Object> c = new Composite.InOrderSequence<Object>();
+		
+		SuccessNode<Object> mockNode = mock(SuccessNode.class);
+		c.addChild(mockNode);
+		c.addChild(new RunningNode<Object>());
+		c.addChild(mockNode);
+		
+		NodeStatus process = c.process(new Object());
+		verify(mockNode, times(1)).process(any());
+		assertTrue(process == NodeStatus.SUCCESS);
+	}
+	
 	@Mock
-	Node<Object> success ;
+	Node<Object> success;
 	
 	@Mock
 	Node<Object> failure;
