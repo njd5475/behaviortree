@@ -29,7 +29,7 @@ public abstract class Composite<Context extends Object> extends Node<Context> {
 			NodeStatus toRet = NodeStatus.FAILURE;
 			for(Node<Context> child : getChildren()) {
 				toRet = child.process(Context);
-				if(failed(toRet)) {
+				if(failed(toRet) || running(toRet)) {
 					return toRet;
 				}
 			}
