@@ -22,9 +22,11 @@ public class BehaviorTreesTest {
 	public void testNegateCondition() {
 		Condition mockCondition = mock(Condition.class);
 		when(mockCondition.pass(any())).thenReturn(false, true);
-		NegateCondition condition = new NegateCondition(mockCondition);
+		NegateCondition condition = NegateCondition.negate(mockCondition);
 		assertTrue(condition.pass(new Object()));
 		assertFalse(condition.pass(new Object()));
+		
+		
 	}
 	
 	@Test
@@ -37,7 +39,7 @@ public class BehaviorTreesTest {
 		c.addChild(mockNode);
 		
 		NodeStatus process = c.process(new Object());
-		assertTrue(process == NodeStatus.FAILURE);
+		assertEquals(NodeStatus.FAILURE, process);
 		verify(mockNode, times(1)).process(any());
 	}
 	
@@ -50,7 +52,7 @@ public class BehaviorTreesTest {
 		c.addChild(new SuccessNode<Object>());
 		
 		NodeStatus process = c.process(new Object());
-		assertTrue(process == NodeStatus.SUCCESS);
+		assertEquals(NodeStatus.SUCCESS, process);
 	}
 	
 	@Test
@@ -165,9 +167,9 @@ public class BehaviorTreesTest {
 	public void testStatuses() {
 		assertEquals(NodeStatus.SUCCESS, NodeStatus.valueOf("SUCCESS"));
 		assertTrue(NodeStatus.SUCCESS.toString().equals("SUCCESS"));
-		assertTrue(NodeStatus.SUCCESS.ordinal() == 0);
+		assertEquals(0, NodeStatus.SUCCESS.ordinal());
 		assertTrue(NodeStatus.FAILURE.toString().equals("FAILURE"));
-		assertTrue(NodeStatus.FAILURE.ordinal() == 1);
+		assertEquals(1, NodeStatus.FAILURE.ordinal());
 	}
 	
 	@Test
@@ -204,7 +206,7 @@ public class BehaviorTreesTest {
 		when(second.pass(testContext)).thenReturn(false);
 		when(third.pass(testContext)).thenReturn(false);
 		
-		assertTrue(select.process(testContext) == NodeStatus.FAILURE);
+		assertEquals(NodeStatus.FAILURE, select.process(testContext));
 		
 	}
 }
