@@ -1,5 +1,5 @@
 package com.anor.behaviortree;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import org.junit.Test;
@@ -20,7 +20,11 @@ public class BehaviorTreesTest {
 
 	@Test
 	public void testNegateCondition() {
-		
+		Condition mockCondition = mock(Condition.class);
+		when(mockCondition.pass(any())).thenReturn(false, true);
+		NegateCondition condition = new NegateCondition(mockCondition);
+		assertTrue(condition.pass(new Object()));
+		assertFalse(condition.pass(new Object()));
 	}
 	
 	@Test
@@ -54,13 +58,14 @@ public class BehaviorTreesTest {
 		Composite<Object> c = new Composite.InOrderSequence<Object>();
 		
 		SuccessNode<Object> mockNode = mock(SuccessNode.class);
+		when(mockNode.process(any())).thenReturn(NodeStatus.SUCCESS);
 		c.addChild(mockNode);
 		c.addChild(new RunningNode<Object>());
 		c.addChild(mockNode);
 		
 		NodeStatus process = c.process(new Object());
 		verify(mockNode, times(1)).process(any());
-		assertTrue(process == NodeStatus.SUCCESS);
+		assertEquals(NodeStatus.RUNNING, process);
 	}
 	
 	@Mock
@@ -115,7 +120,7 @@ public class BehaviorTreesTest {
 		boolean p = true;
 		for(int i=100; i > 0; --i) {
 			NodeStatus s = c.process(testObject);
-			assertTrue(process1 == s);
+			assertEquals(process1,s);
 		}
 		assertTrue(p);
 	}
@@ -123,16 +128,16 @@ public class BehaviorTreesTest {
 	@Test
 	public void testCheckFunctions() {
 		assertTrue(Node.failed(NodeStatus.FAILURE));
-		assertTrue(!Node.failed(NodeStatus.SUCCESS));
-		assertTrue(!Node.failed(NodeStatus.RUNNING));
+		assertFalse(Node.failed(NodeStatus.SUCCESS));
+		assertFalse(Node.failed(NodeStatus.RUNNING));
 		
 		assertTrue(Node.success(NodeStatus.SUCCESS));
-		assertTrue(!Node.success(NodeStatus.FAILURE));
-		assertTrue(!Node.success(NodeStatus.RUNNING));
+		assertFalse(Node.success(NodeStatus.FAILURE));
+		assertFalse(Node.success(NodeStatus.RUNNING));
 		
 		assertTrue(Node.running(NodeStatus.RUNNING));
-		assertTrue(!Node.running(NodeStatus.SUCCESS));
-		assertTrue(!Node.running(NodeStatus.FAILURE));
+		assertFalse(Node.running(NodeStatus.SUCCESS));
+		assertFalse(Node.running(NodeStatus.FAILURE));
 	}
 	
 	@Test
@@ -146,7 +151,7 @@ public class BehaviorTreesTest {
 		when(failure.process(testObject)).thenReturn(NodeStatus.FAILURE);
 		
 		InverterNode<Object> toTest = new InverterNode<Object>(success);
-		assertTrue(toTest.getChild() == success);
+		assertEquals(success, toTest.getChild());
 		assertTrue(Node.failed(toTest.process(testObject)));
 		
 		toTest = new InverterNode<Object>(failure);
@@ -158,7 +163,7 @@ public class BehaviorTreesTest {
 	
 	@Test
 	public void testStatuses() {
-		assertTrue(NodeStatus.valueOf("SUCCESS") == NodeStatus.SUCCESS);
+		assertEquals(NodeStatus.SUCCESS, NodeStatus.valueOf("SUCCESS"));
 		assertTrue(NodeStatus.SUCCESS.toString().equals("SUCCESS"));
 		assertTrue(NodeStatus.SUCCESS.ordinal() == 0);
 		assertTrue(NodeStatus.FAILURE.toString().equals("FAILURE"));
