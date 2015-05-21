@@ -1,6 +1,12 @@
-//needs extra dependencies: objenesis & hamcrest
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+group = "com.github.njd5475"
+archivesBaseName = "behavior-trees"
+version = "0.0.1"
 
 repositories {
     mavenCentral()
@@ -11,4 +17,67 @@ dependencies {
   testCompile "org.mockito:mockito-core:1.9.5"
   testCompile "org.mockito:mockito-all:1.9.5"
 }
-  
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from 'build/docs/javadoc'
+}
+ 
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+artifacts {
+    archives jar
+    archives javadocJar
+    archives sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+
+      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+
+      pom.project {
+        name 'BehaviorTrees'
+        packaging 'jar'
+        // optionally artifactId can be defined here 
+        description 'An extendable reusable implementation of behavior trees.'
+        url 'https://github.com/njd5475/behaviortree'
+
+        scm {
+          connection 'scm:git:https://github.com/njd5475/behaviortree.git'
+          developerConnection 'scm:git:https://github.com/njd5475/behaviortree.git'
+          url 'https://github.com/njd5475/behaviortree'
+        }
+
+        licenses {
+          license {
+            name 'The MIT License (MIT)'
+            url 'http://opensource.org/licenses/MIT'
+          }
+        }
+
+        developers {
+          developer {
+            id 'ZealousCoder'
+            name 'Zealous Coder'
+          }
+        }
+      }
+    }
+  }
+}
